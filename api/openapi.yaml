@@ -1,0 +1,3603 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: hq-techport@mail.nasa.gov
+    name: TechPort Team
+    url: https://techport.nasa.gov
+  description: TechPort RESTful API
+  title: TechPort
+  version: 3.13.2
+servers:
+- url: https://techport.nasa.gov
+tags:
+- name: Project
+- name: Organization
+- name: Resource
+paths:
+  /api:
+    get:
+      description: Returns the swagger specification for the API.
+      operationId: Resource_getSpecification
+      responses:
+        "200":
+          description: Successful response
+        default:
+          description: Object not found.
+      tags:
+      - Resource
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api
+      x-accepts: application/json
+  /api/projects:
+    get:
+      description: Returns a list of available technology project IDs.
+      operationId: Project_listAvailableIds
+      parameters:
+      - description: ISO 8601 full-date in the format YYYY-MM-DD. Filters the list
+          of available ID values by their lastUpdated parameter.
+        explode: true
+        in: query
+        name: updatedSince
+        required: true
+        schema:
+          format: date
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectListAvailableIdsResponse'
+          description: Successful response
+        default:
+          description: Object not found.
+      tags:
+      - Project
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api-projects
+      x-accepts: application/json
+  /api/projects/search:
+    get:
+      description: Returns a list of projects matching the search term.
+      operationId: Project_findMatchingProjects
+      parameters:
+      - description: The specific ID of the project requested.
+        explode: true
+        in: query
+        name: projectId
+        required: false
+        schema:
+          format: int64
+          type: integer
+        style: form
+      - description: The term on which to search. Will check all project fields for
+          the this term.
+        explode: true
+        in: query
+        name: searchQuery
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: The mission directorate acronym of the projects. Used to filter.
+        explode: true
+        in: query
+        name: missionDirectorate
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: The program acronym of the projects. Used to filter.
+        explode: true
+        in: query
+        name: program
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: The term on which to search. Will check only project titles for
+          the this term.
+        explode: true
+        in: query
+        name: titleSearch
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectFindMatchingProjectsResponse'
+          description: Successful response
+        default:
+          description: Object not found.
+      tags:
+      - Project
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api-projects-search
+      x-accepts: application/json
+  /api/projects/{projectId}:
+    get:
+      description: Returns information about a specific technology project.
+      operationId: Project_getInfo
+      parameters:
+      - description: ID of project to fetch
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/project'
+          description: Successful response
+        default:
+          description: Object not found.
+      tags:
+      - Project
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api-projects-projectId
+      x-accepts: application/json
+  /api/organizations:
+    get:
+      description: Returns a list of organizations that match a given name.
+      operationId: Organization_getListByName
+      parameters:
+      - description: Organization Name to filter on.
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationGetListByNameResponse'
+          description: Successful response
+        default:
+          description: Object not found.
+      tags:
+      - Organization
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api-organizations
+      x-accepts: application/json
+  /api/organizations/types:
+    get:
+      description: "Returns a list of available organization types, including set-aside\
+        \ and MSI types."
+      operationId: Organization_listTypes
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListTypesResponse'
+          description: Successful response
+        default:
+          description: Object not found.
+      tags:
+      - Organization
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api-organizations-types
+      x-accepts: application/json
+  /api/organizations/{organizationId}:
+    get:
+      description: Get an organization and its information.
+      operationId: Organization_getInformation
+      parameters:
+      - description: Organization Id.
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationGetInformationResponse'
+          description: Success. Organization detailed data.
+        default:
+          description: Error.
+      tags:
+      - Organization
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api-organizations-organizationId
+      x-accepts: application/json
+components:
+  schemas:
+    destination:
+      description: Represents a destination towards which the technology on this project
+        helps advance the Agency goals.
+      type: string
+    closeoutDocument:
+      description: Represents a file hyperlink or external hyperlink to a project
+        closeout final report artifact.
+      type: string
+    technologyArea:
+      description: The Technology Area for a given technology that corresponds to
+        the NASA Technology Roadmap.
+      properties:
+        title:
+          description: The title of the Technology Area.
+          type: string
+        id:
+          description: Unique identifier for the Technology Area.
+          format: int64
+          type: integer
+        code:
+          description: The code identifier for the Technology Area.
+          type: string
+      type: object
+    workLocation:
+      description: A state/territory where work on this project is performed.
+      type: string
+    programDirector:
+      description: The name of a Program Director responsible for management of an
+        project.
+      type: string
+    programManager:
+      description: The name of a Program Manager responsible for management of an
+        project.
+      type: string
+    projectManager:
+      description: The name of a Project Manager responsible for management of an
+        project.
+      type: string
+    principalInvestigator:
+      description: The name of the Principal Investigator who is a lead scientist
+        or engineer for an project.
+      type: string
+    coInvestigator:
+      description: The name of an investigator who is a scientist or engineer for
+        an project.
+      type: string
+    program:
+      description: Represents a NASA program.
+      example:
+        parentProgram: null
+        parentProgramId: 1
+        acronym: acronym
+        responsibleMdId: 9
+        responsibleMd:
+          replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        description: description
+        active: true
+        title: title
+        programId: 1
+      properties:
+        title:
+          description: Title for the program
+          type: string
+        description:
+          description: Description for the program
+          type: string
+        programId:
+          description: Unique ID for this program
+          format: int64
+          type: integer
+        acronym:
+          description: Acronym for this program
+          type: string
+        active:
+          description: True if the program is still active
+          type: boolean
+        parentProgram:
+          $ref: '#/components/schemas/program'
+        parentProgramId:
+          description: Unique ID for the parent program
+          format: int64
+          type: integer
+        responsibleMd:
+          $ref: '#/components/schemas/organization'
+        responsibleMdId:
+          description: Unique ID for the parent responsible mission directorate
+          format: int64
+          type: integer
+      type: object
+    taxonomy:
+      description: Represents data associated with a single taxonomy root entity.
+      properties:
+        title:
+          description: Title for this taxonomy
+          type: string
+        taxonomyRootId:
+          description: Unique ID for this taxonomy
+          format: int64
+          type: integer
+        releaseStatusId:
+          description: ID for this taxonomy roots release status
+          format: int64
+          type: integer
+        definition:
+          description: Definition for this taxonomy
+          type: string
+        modifiedBy:
+          description: The last user to modify this taxonomy
+          type: string
+        modifiedDate:
+          description: The date this taxonomy was last modified
+          format: date
+          type: string
+        children:
+          items:
+            $ref: '#/components/schemas/treeNode'
+          type: array
+        releaseStatus:
+          description: The release status of this taxonomy
+          type: string
+      type: object
+    treeNode:
+      description: Represents a taxonomy node in a tree.
+      properties:
+        content:
+          $ref: '#/components/schemas/taxonomyNode'
+        children:
+          items:
+            $ref: '#/components/schemas/treeNode'
+          type: array
+      type: object
+    taxonomyNode:
+      description: Represents data associated with a single taxonomy node entity.
+      example:
+        taxonomyRootId: 2
+        code: code
+        level: 9
+        hasChildren: true
+        publishedUrl: publishedUrl
+        parentNodeId: 7
+        definition: definition
+        taxonomyNodeId: 5
+        title: title
+      properties:
+        title:
+          description: Title of the taxonomy node
+          type: string
+        taxonomyNodeId:
+          description: Unique identifier for the taxonomy node
+          format: int64
+          type: integer
+        taxonomyRootId:
+          description: Unique identifier for the root of this taxonomy node
+          format: int64
+          type: integer
+        parentNodeId:
+          description: Unique identifier for the taxonomy node/root that is the direct
+            parent of this taxonomy node
+          format: int64
+          type: integer
+        level:
+          description: The level of this node on the tree (0 being the root)
+          format: int64
+          type: integer
+        code:
+          description: Code of the taxonomy node
+          type: string
+        definition:
+          description: Definition of the taxonomy node
+          type: string
+        hasChildren:
+          description: Defines whether this node has children
+          type: boolean
+        publishedUrl:
+          description: Published URL of the taxonomy node
+          type: string
+      type: object
+    contact:
+      description: Represents an individual and their details.
+      example:
+        lastName: lastName
+        fullNameInverted: fullNameInverted
+        secondaryEmail: secondaryEmail
+        contactId: 6
+        prefix: prefix
+        displayOrder: 3
+        fullName: fullName
+        receiveEmail: 1
+        isPublicEmail: true
+        title: title
+        suffix: suffix
+        firstName: firstName
+        middleInitial: middleInitial
+        locationId: 6
+        organization:
+          replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        location:
+          zip: zip
+          country:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          NALocation: NALocation
+          stateTerritoryName: stateTerritoryName
+          city: city
+          zip2: zip2
+          locationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          countryId: 1
+          locationTypeId: 7
+          locationId: 6
+          addressLine1: addressLine1
+          shortLocationString: shortLocationString
+          addressLine2: addressLine2
+          state: state
+        workPhone: workPhone
+        fax: fax
+        workPhoneExtension: workPhoneExtension
+        primaryEmail: primaryEmail
+      properties:
+        title:
+          description: Title for the contact
+          type: string
+        contactId:
+          description: Unique ID for this contact
+          format: int64
+          type: integer
+        displayOrder:
+          description: Display order
+          format: int64
+          type: integer
+        fax:
+          description: Fax number for the contact
+          type: string
+        firstName:
+          description: First name for the contact
+          type: string
+        lastName:
+          description: Last name for the contact
+          type: string
+        fullName:
+          description: "Full name for the contact, first middle initial last"
+          type: string
+        fullNameInverted:
+          description: "Full name for the contact but inverted, last first middle\
+            \ initial"
+          type: string
+        location:
+          $ref: '#/components/schemas/location'
+        locationId:
+          description: Unique ID representing the contacts location
+          format: int64
+          type: integer
+        middleInitial:
+          description: Middle initial for the contact
+          type: string
+        organization:
+          $ref: '#/components/schemas/organization'
+        prefix:
+          description: Prefix for the contact
+          type: string
+        primaryEmail:
+          description: Primary email for the contact
+          type: string
+        secondaryEmail:
+          description: Secondary email for the contact
+          type: string
+        suffix:
+          description: Suffix for the contact
+          type: string
+        workPhoneExtension:
+          description: Extension for contacts work phone number
+          type: string
+        workPhone:
+          description: Phone number for the contact
+          type: string
+        receiveEmail:
+          description: 1 if the contact is signed up to receive TechPort emails
+          format: int64
+          type: integer
+        isPublicEmail:
+          description: True if the contacts email is available to be shown to the
+            public
+          type: boolean
+      type: object
+    organization:
+      description: A NASA center/facility associated with an project
+      example:
+        replacementOrganizationId: 9
+        msiData:
+          key:
+          - msiData
+          - msiData
+        organizationName: organizationName
+        acronym: acronym
+        ein: ein
+        isActive: true
+        parentOrganizationId: 9
+        url: url
+        NAOrganization: true
+        organizationId: 1
+        organizationType:
+          code: code
+          lkuCodeTypeId: 2
+          displayOrder: 7
+          description: description
+          lkuCodeId: 3
+          lkuCodeType:
+            codeType: codeType
+            lkuCodeTypeId: 4
+            description: description
+        external: true
+        murepUnitId: 8
+        phone: phone
+        locationId: 4
+        linkCount: 6
+        uei: uei
+        setAsideData:
+        - setAsideData
+        - setAsideData
+        organizationTypeId: 5
+        location:
+          zip: zip
+          country:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          NALocation: NALocation
+          stateTerritoryName: stateTerritoryName
+          city: city
+          zip2: zip2
+          locationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          countryId: 1
+          locationTypeId: 7
+          locationId: 6
+          addressLine1: addressLine1
+          shortLocationString: shortLocationString
+          addressLine2: addressLine2
+          state: state
+        fax: fax
+        dunsNumber: dunsNumber
+      properties:
+        organizationId:
+          description: Unique ID for this organization
+          format: int64
+          type: integer
+        acronym:
+          description: The acronym of the organization
+          type: string
+        fax:
+          description: Fax number of the organization
+          type: string
+        isActive:
+          description: True if the organization is an active organization
+          type: boolean
+        location:
+          $ref: '#/components/schemas/location'
+        locationId:
+          description: Unique ID representing the organizations location
+          format: int64
+          type: integer
+        organizationName:
+          description: The name of the organization
+          type: string
+        organizationType:
+          $ref: '#/components/schemas/lkuCode'
+        organizationTypeId:
+          description: Unique ID for the lookup code representing the organization
+            type
+          format: int64
+          type: integer
+        parentOrganizationId:
+          description: Unique ID for the parent organization
+          format: int64
+          type: integer
+        phone:
+          description: The phone number for the organization
+          type: string
+        replacementOrganizationId:
+          description: Unique ID for the replacement organization
+          format: int64
+          type: integer
+        url:
+          description: The URL for the organization
+          type: string
+        NAOrganization:
+          description: True if the organization is in North America
+          type: boolean
+        external:
+          description: True if the organization is external to NASA
+          type: boolean
+        linkCount:
+          description: Amount of links this organization has
+          format: int64
+          type: integer
+        murepUnitId:
+          description: Unique identifier assigned to U.S. academic institutions by
+            MUREP.
+          format: int64
+          type: integer
+        ein:
+          description: The employer identification number (EIN) of the entity.
+          type: string
+        uei:
+          description: The unique entity identifier (UEI) of the entity.
+          type: string
+        dunsNumber:
+          description: The DUNS number assigned to the organization.
+          type: string
+        msiData:
+          additionalProperties:
+            description: The organization MSI status types for a given fiscal year.
+            items:
+              type: string
+            type: array
+          description: A key/value pair of strings describing the organization MSI
+            status by fiscal year.
+          type: object
+        setAsideData:
+          description: The organization set-aside types.
+          items:
+            type: string
+          type: array
+      type: object
+    organizationType:
+      description: "A heirarchical representation of an organization type. Similar\
+        \ to the LkuCode type returned for organization.organizationType, but formatted\
+        \ in a parent/child relationship."
+      example:
+        level: level
+        hasChildren: true
+        name: name
+        organizationTypeId: 0
+        parentId: 6
+      properties:
+        organizationTypeId:
+          description: Unique ID for this organization type.
+          format: int64
+          type: integer
+        name:
+          description: The name of the organization type.
+          type: string
+        hasChildren:
+          description: Whether or not the type has child types.
+          type: boolean
+        level:
+          description: The relative level of the organization type in the heirarchy.
+          type: string
+        parentId:
+          description: Unique ID for the parent type in the heriarchy.
+          format: int64
+          type: integer
+      type: object
+    location:
+      description: Represents a physical location.
+      example:
+        zip: zip
+        country:
+          code: code
+          lkuCodeTypeId: 2
+          displayOrder: 7
+          description: description
+          lkuCodeId: 3
+          lkuCodeType:
+            codeType: codeType
+            lkuCodeTypeId: 4
+            description: description
+        NALocation: NALocation
+        stateTerritoryName: stateTerritoryName
+        city: city
+        zip2: zip2
+        locationType:
+          code: code
+          lkuCodeTypeId: 2
+          displayOrder: 7
+          description: description
+          lkuCodeId: 3
+          lkuCodeType:
+            codeType: codeType
+            lkuCodeTypeId: 4
+            description: description
+        countryId: 1
+        locationTypeId: 7
+        locationId: 6
+        addressLine1: addressLine1
+        shortLocationString: shortLocationString
+        addressLine2: addressLine2
+        state: state
+      properties:
+        locationId:
+          description: Unique ID for this location
+          format: int64
+          type: integer
+        addressLine1:
+          description: First line of address for location
+          type: string
+        addressLine2:
+          description: Second line of address for location
+          type: string
+        city:
+          description: City for location
+          type: string
+        locationType:
+          $ref: '#/components/schemas/lkuCode'
+        locationTypeId:
+          description: Unique ID for the lookup code representing the location type
+          format: int64
+          type: integer
+        state:
+          description: State for location
+          type: string
+        stateTerritoryName:
+          description: State Territory name for location
+          type: string
+        zip:
+          description: ZIP code for location
+          type: string
+        zip2:
+          description: Secondary ZIP code for location
+          type: string
+        NALocation:
+          description: True if this location is located in North America
+          type: string
+        country:
+          $ref: '#/components/schemas/lkuCode'
+        countryId:
+          description: Unique ID for the lookup code representing the location country
+          format: int64
+          type: integer
+        shortLocationString:
+          description: A string representing the full location
+          type: string
+      type: object
+    lkuCode:
+      description: Lookup code representing more data about an object usually stored
+        in our database.
+      example:
+        code: code
+        lkuCodeTypeId: 2
+        displayOrder: 7
+        description: description
+        lkuCodeId: 3
+        lkuCodeType:
+          codeType: codeType
+          lkuCodeTypeId: 4
+          description: description
+      properties:
+        description:
+          description: Description of the LKU Code
+          type: string
+        lkuCodeId:
+          description: Unique ID for this LKU Code
+          format: int64
+          type: integer
+        code:
+          description: Unique text code that represents this LKU Code
+          type: string
+        lkuCodeTypeId:
+          description: Unique ID for the LKU Code Type
+          format: int64
+          type: integer
+        lkuCodeType:
+          $ref: '#/components/schemas/lkuCodeType'
+        displayOrder:
+          description: Display order
+          format: int64
+          type: integer
+      type: object
+    lkuCodeType:
+      description: Lookup code type further showing how the lookup codes within this
+        type will be used.
+      example:
+        codeType: codeType
+        lkuCodeTypeId: 4
+        description: description
+      properties:
+        description:
+          description: Description of the LKU Code Type
+          type: string
+        lkuCodeTypeId:
+          description: Unique ID for this LKU Code Type
+          format: int64
+          type: integer
+        codeType:
+          description: Unique text code type that represents this LKU Code
+          type: string
+      type: object
+    project:
+      description: Top-level TechPort object representing a NASA technology project
+        and its associated data.
+      example:
+        benefits: benefits
+        programDirectors:
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        coInvestigators:
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        endTrl: 5
+        responsibleMd:
+          parentProgram: null
+          parentProgramId: 1
+          acronym: acronym
+          responsibleMdId: 9
+          responsibleMd:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          description: description
+          active: true
+          title: title
+          programId: 1
+        programManagers:
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        description: description
+        program:
+          parentProgram: null
+          parentProgramId: 1
+          acronym: acronym
+          responsibleMdId: 9
+          responsibleMd:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          description: description
+          active: true
+          title: title
+          programId: 1
+        title: title
+        leadOrganization:
+          replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        startTrl: 6
+        lastUpdated: 2000-01-23
+        supportingOrganizations:
+        - replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        - replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        additionalTaxonomyNodes:
+        - taxonomyRootId: 2
+          code: code
+          level: 9
+          hasChildren: true
+          publishedUrl: publishedUrl
+          parentNodeId: 7
+          definition: definition
+          taxonomyNodeId: 5
+          title: title
+        - taxonomyRootId: 2
+          code: code
+          level: 9
+          hasChildren: true
+          publishedUrl: publishedUrl
+          parentNodeId: 7
+          definition: definition
+          taxonomyNodeId: 5
+          title: title
+        closeoutSummary: closeoutSummary
+        startDateString: startDateString
+        viewCount: 5
+        currentTrl: 1
+        website: website
+        primaryImage:
+          publishedBy: publishedBy
+          description: description
+          files:
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          id: 2
+          publishedDateString: publishedDateString
+          title: title
+          contentType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          url: url
+        acronym: acronym
+        libraryItems:
+        - publishedBy: publishedBy
+          description: description
+          files:
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          id: 2
+          publishedDateString: publishedDateString
+          title: title
+          contentType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          url: url
+        - publishedBy: publishedBy
+          description: description
+          files:
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          id: 2
+          publishedDateString: publishedDateString
+          title: title
+          contentType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          url: url
+        destinations:
+        - code: code
+          lkuCodeTypeId: 2
+          displayOrder: 7
+          description: description
+          lkuCodeId: 3
+          lkuCodeType:
+            codeType: codeType
+            lkuCodeTypeId: 4
+            description: description
+        - code: code
+          lkuCodeTypeId: 2
+          displayOrder: 7
+          description: description
+          lkuCodeId: 3
+          lkuCodeType:
+            codeType: codeType
+            lkuCodeTypeId: 4
+            description: description
+        coFundingPartners:
+        - replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        - replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        projectManagers:
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        statesWithWork:
+        - zip: zip
+          country:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          NALocation: NALocation
+          stateTerritoryName: stateTerritoryName
+          city: city
+          zip2: zip2
+          locationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          countryId: 1
+          locationTypeId: 7
+          locationId: 6
+          addressLine1: addressLine1
+          shortLocationString: shortLocationString
+          addressLine2: addressLine2
+          state: state
+        - zip: zip
+          country:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          NALocation: NALocation
+          stateTerritoryName: stateTerritoryName
+          city: city
+          zip2: zip2
+          locationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          countryId: 1
+          locationTypeId: 7
+          locationId: 6
+          addressLine1: addressLine1
+          shortLocationString: shortLocationString
+          addressLine2: addressLine2
+          state: state
+        principalInvestigators:
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        - lastName: lastName
+          fullNameInverted: fullNameInverted
+          secondaryEmail: secondaryEmail
+          contactId: 6
+          prefix: prefix
+          displayOrder: 3
+          fullName: fullName
+          receiveEmail: 1
+          isPublicEmail: true
+          title: title
+          suffix: suffix
+          firstName: firstName
+          middleInitial: middleInitial
+          locationId: 6
+          organization:
+            replacementOrganizationId: 9
+            msiData:
+              key:
+              - msiData
+              - msiData
+            organizationName: organizationName
+            acronym: acronym
+            ein: ein
+            isActive: true
+            parentOrganizationId: 9
+            url: url
+            NAOrganization: true
+            organizationId: 1
+            organizationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            external: true
+            murepUnitId: 8
+            phone: phone
+            locationId: 4
+            linkCount: 6
+            uei: uei
+            setAsideData:
+            - setAsideData
+            - setAsideData
+            organizationTypeId: 5
+            location:
+              zip: zip
+              country:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              NALocation: NALocation
+              stateTerritoryName: stateTerritoryName
+              city: city
+              zip2: zip2
+              locationType:
+                code: code
+                lkuCodeTypeId: 2
+                displayOrder: 7
+                description: description
+                lkuCodeId: 3
+                lkuCodeType:
+                  codeType: codeType
+                  lkuCodeTypeId: 4
+                  description: description
+              countryId: 1
+              locationTypeId: 7
+              locationId: 6
+              addressLine1: addressLine1
+              shortLocationString: shortLocationString
+              addressLine2: addressLine2
+              state: state
+            fax: fax
+            dunsNumber: dunsNumber
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          workPhone: workPhone
+          fax: fax
+          workPhoneExtension: workPhoneExtension
+          primaryEmail: primaryEmail
+        stiDaas:
+        - publishedBy: publishedBy
+          description: description
+          files:
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          id: 2
+          publishedDateString: publishedDateString
+          title: title
+          contentType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          url: url
+        - publishedBy: publishedBy
+          description: description
+          files:
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          id: 2
+          publishedDateString: publishedDateString
+          title: title
+          contentType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          url: url
+        closeoutDocuments:
+        - publishedBy: publishedBy
+          description: description
+          files:
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          id: 2
+          publishedDateString: publishedDateString
+          title: title
+          contentType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          url: url
+        - publishedBy: publishedBy
+          description: description
+          files:
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          - fileName: fileName
+            fileSize: 6
+            fileExtension: fileExtension
+            url: url
+            fileId: 6
+          id: 2
+          publishedDateString: publishedDateString
+          title: title
+          contentType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          url: url
+        statusDescription: statusDescription
+        primaryTaxonomyNodes:
+        - taxonomyRootId: 2
+          code: code
+          level: 9
+          hasChildren: true
+          publishedUrl: publishedUrl
+          parentNodeId: 7
+          definition: definition
+          taxonomyNodeId: 5
+          title: title
+        - taxonomyRootId: 2
+          code: code
+          level: 9
+          hasChildren: true
+          publishedUrl: publishedUrl
+          parentNodeId: 7
+          definition: definition
+          taxonomyNodeId: 5
+          title: title
+        projectId: 0
+        endDateString: endDateString
+      properties:
+        title:
+          description: Title of the project.
+          type: string
+        description:
+          description: A detailed description of the project.
+          type: string
+        projectId:
+          description: Unique identifier for the project.
+          format: int64
+          type: integer
+        lastUpdated:
+          description: ISO 8601 full-date in the format YYYY-MM-DD describing the
+            last time this project was updated.
+          format: date
+          type: string
+        acronym:
+          description: Abbreviated name of the project.
+          type: string
+        statusDescription:
+          description: "Indicates whether the project is currently active, completed,\
+            \ or canceled."
+          type: string
+        benefits:
+          description: "Describes the benefits offered to NASA funded and planned\
+            \ missions, unfunded or planned missions, commercial space industry, and\
+            \ to the nation."
+          type: string
+        startDateString:
+          description: The month and year the project was authorized to proceed.
+          type: string
+        endDateString:
+          description: The month and year the project is expected to complete its
+            work.
+          type: string
+        startTrl:
+          description: The technology maturity (technology readiness level) of the
+            project at its beginning.
+          format: int64
+          type: integer
+        currentTrl:
+          description: The current technology maturity (technology readiness level)
+            of the project.
+          format: int64
+          type: integer
+        endTrl:
+          description: The estimated technology maturity (technology readiness level)
+            of the project at its end.
+          format: int64
+          type: integer
+        primaryTaxonomyNodes:
+          description: List of primary taxonomy nodes (from the NASA Technology Roadmap)
+            associated with the project.
+          items:
+            $ref: '#/components/schemas/taxonomyNode'
+          type: array
+        additionalTaxonomyNodes:
+          description: List of additional and cross-cutting taxonomy nodes associated
+            with the project.
+          items:
+            $ref: '#/components/schemas/taxonomyNode'
+          type: array
+        destinations:
+          description: List of the NASA destinations the technology on this project
+            helps achieve.
+          items:
+            $ref: '#/components/schemas/lkuCode'
+          type: array
+        program:
+          $ref: '#/components/schemas/program'
+        responsibleMd:
+          $ref: '#/components/schemas/program'
+        leadOrganization:
+          $ref: '#/components/schemas/organization'
+        supportingOrganizations:
+          description: The supporting organizations for this project that are conducting
+            work on the project.
+          items:
+            $ref: '#/components/schemas/organization'
+          type: array
+        coFundingPartners:
+          description: "Other government agencies, NASA Mission Directoratres, universities,\
+            \ or commercial entities performing contributing resources to this project."
+          items:
+            $ref: '#/components/schemas/organization'
+          type: array
+        statesWithWork:
+          description: States and territories with people performing work on this
+            project.
+          items:
+            $ref: '#/components/schemas/location'
+          type: array
+        programDirectors:
+          description: Names of the Program Directors responsible for the management
+            of this project.
+          items:
+            $ref: '#/components/schemas/contact'
+          type: array
+        programManagers:
+          description: Names of the Program Managers responsible for the management
+            of this project.
+          items:
+            $ref: '#/components/schemas/contact'
+          type: array
+        projectManagers:
+          description: Names of the Project Managers responsible for the management
+            of this project.
+          items:
+            $ref: '#/components/schemas/contact'
+          type: array
+        principalInvestigators:
+          description: Names of the Principal Investigators who are the lead scientists
+            or engineers for this project.
+          items:
+            $ref: '#/components/schemas/contact'
+          type: array
+        coInvestigators:
+          description: Names of the additional investigators who are scientists or
+            engineers for this project.
+          items:
+            $ref: '#/components/schemas/contact'
+          type: array
+        website:
+          description: The URL for the associated website.
+          type: string
+        libraryItems:
+          description: List of library items in the project library.
+          items:
+            $ref: '#/components/schemas/libraryItem'
+          type: array
+        stiDaas:
+          description: List of STI DAAs in the project library.
+          items:
+            $ref: '#/components/schemas/libraryItem'
+          type: array
+        closeoutSummary:
+          description: The project closeout summary excerpt.
+          type: string
+        closeoutDocuments:
+          description: List of document files or links to the project final report
+            closeout documentation.
+          items:
+            $ref: '#/components/schemas/libraryItem'
+          type: array
+        primaryImage:
+          $ref: '#/components/schemas/libraryItem'
+        viewCount:
+          description: The number of views for the project.
+          format: int64
+          type: integer
+      type: object
+      x-konfig-is-used-in-successful-response: true
+    libraryItem:
+      description: Represents a specific library item.
+      example:
+        publishedBy: publishedBy
+        description: description
+        files:
+        - fileName: fileName
+          fileSize: 6
+          fileExtension: fileExtension
+          url: url
+          fileId: 6
+        - fileName: fileName
+          fileSize: 6
+          fileExtension: fileExtension
+          url: url
+          fileId: 6
+        id: 2
+        publishedDateString: publishedDateString
+        title: title
+        contentType:
+          code: code
+          lkuCodeTypeId: 2
+          displayOrder: 7
+          description: description
+          lkuCodeId: 3
+          lkuCodeType:
+            codeType: codeType
+            lkuCodeTypeId: 4
+            description: description
+        url: url
+      properties:
+        title:
+          description: Title of the library item
+          type: string
+        description:
+          description: Description of the library item.
+          type: string
+        id:
+          description: Unique identifier for the library item.
+          format: int64
+          type: integer
+        contentType:
+          $ref: '#/components/schemas/lkuCode'
+        files:
+          description: List of files associated with the library item.
+          items:
+            $ref: '#/components/schemas/file'
+          type: array
+        url:
+          description: External URL for the library item.
+          type: string
+        publishedDateString:
+          description: Date the library item was published.
+          type: string
+        publishedBy:
+          description: Publisher of the library item.
+          type: string
+      type: object
+    file:
+      description: Represents a file associated with a library item.
+      example:
+        fileName: fileName
+        fileSize: 6
+        fileExtension: fileExtension
+        url: url
+        fileId: 6
+      properties:
+        fileId:
+          description: Unique identifier for the file.
+          format: int64
+          type: integer
+        url:
+          description: The TechPort URL at which the file is accessible for download.
+          type: string
+        fileSize:
+          description: The size of the file in bytes.
+          format: int64
+          type: integer
+        fileExtension:
+          description: The file extension for the file.
+          type: string
+        fileName:
+          description: The file name.
+          type: string
+      type: object
+    ProjectListAvailableIdsResponse:
+      example:
+        lastUpdated: lastUpdated
+        id: 0
+      properties:
+        id:
+          format: int64
+          type: integer
+        lastUpdated:
+          type: string
+      type: object
+      x-konfig-is-used-in-successful-response: true
+    ProjectFindMatchingProjectsResponse:
+      description: List of projects that match the criteria.
+      items:
+        $ref: '#/components/schemas/ProjectFindMatchingProjectsResponse_inner'
+      type: array
+      x-konfig-is-used-in-successful-response: true
+    OrganizationGetListByNameResponse:
+      example:
+        organizations:
+        - replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+        - replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+      properties:
+        organizations:
+          items:
+            $ref: '#/components/schemas/organization'
+          type: array
+      type: object
+      x-konfig-is-used-in-successful-response: true
+    OrganizationListTypesResponse:
+      example:
+        organizations:
+        - level: level
+          hasChildren: true
+          name: name
+          organizationTypeId: 0
+          parentId: 6
+        - level: level
+          hasChildren: true
+          name: name
+          organizationTypeId: 0
+          parentId: 6
+      properties:
+        organizations:
+          items:
+            $ref: '#/components/schemas/organizationType'
+          type: array
+      type: object
+      x-konfig-is-used-in-successful-response: true
+    OrganizationGetInformationResponse:
+      example:
+        organization:
+          replacementOrganizationId: 9
+          msiData:
+            key:
+            - msiData
+            - msiData
+          organizationName: organizationName
+          acronym: acronym
+          ein: ein
+          isActive: true
+          parentOrganizationId: 9
+          url: url
+          NAOrganization: true
+          organizationId: 1
+          organizationType:
+            code: code
+            lkuCodeTypeId: 2
+            displayOrder: 7
+            description: description
+            lkuCodeId: 3
+            lkuCodeType:
+              codeType: codeType
+              lkuCodeTypeId: 4
+              description: description
+          external: true
+          murepUnitId: 8
+          phone: phone
+          locationId: 4
+          linkCount: 6
+          uei: uei
+          setAsideData:
+          - setAsideData
+          - setAsideData
+          organizationTypeId: 5
+          location:
+            zip: zip
+            country:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            NALocation: NALocation
+            stateTerritoryName: stateTerritoryName
+            city: city
+            zip2: zip2
+            locationType:
+              code: code
+              lkuCodeTypeId: 2
+              displayOrder: 7
+              description: description
+              lkuCodeId: 3
+              lkuCodeType:
+                codeType: codeType
+                lkuCodeTypeId: 4
+                description: description
+            countryId: 1
+            locationTypeId: 7
+            locationId: 6
+            addressLine1: addressLine1
+            shortLocationString: shortLocationString
+            addressLine2: addressLine2
+            state: state
+          fax: fax
+          dunsNumber: dunsNumber
+      properties:
+        organization:
+          $ref: '#/components/schemas/organization'
+      type: object
+      x-konfig-is-used-in-successful-response: true
+    konfig-generated-schema-single-parameter-schema-get--api:
+      properties: {}
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter: []
+    konfig-generated-schema-single-parameter-schema-get--api-projects:
+      properties:
+        updatedSince:
+          format: date
+          type: string
+      required:
+      - updatedSince
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - updatedSince
+    konfig-generated-schema-single-parameter-schema-get--api-projects-search:
+      properties:
+        projectId:
+          format: int64
+          type: integer
+        searchQuery:
+          type: string
+        missionDirectorate:
+          type: string
+        program:
+          type: string
+        titleSearch:
+          type: string
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - projectId
+      - searchQuery
+      - missionDirectorate
+      - program
+      - titleSearch
+    konfig-generated-schema-single-parameter-schema-get--api-projects-projectId:
+      properties:
+        projectId:
+          format: int64
+          type: integer
+      required:
+      - projectId
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - projectId
+    konfig-generated-schema-single-parameter-schema-get--api-organizations:
+      properties:
+        name:
+          type: string
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - name
+    konfig-generated-schema-single-parameter-schema-get--api-organizations-types:
+      properties: {}
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter: []
+    konfig-generated-schema-single-parameter-schema-get--api-organizations-organizationId:
+      properties:
+        organizationId:
+          format: int64
+          type: integer
+      required:
+      - organizationId
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - organizationId
+    ProjectFindMatchingProjectsResponse_inner:
+      example:
+        description: description
+        id: 0
+        title: title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        id:
+          format: int64
+          type: integer
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+      x-konfig-globally-required-security: false
+
